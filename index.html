@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <title>Document</title>
+</head>
+
+<body>
+  <input type="text" id="uintTextBox" min="3" max="30" maxlength="2">
+</body>
+<script>
+  jQuery.fn.inputFilter = function(callback, errMsg) {
+    return this.on("input keydown keyup mousedown mouseup select contextmenu drop focusout", function (e) {
+      if (callback(this.value)) {
+        // Accepted value
+        if (["keydown", "mousedown", "focusout"].indexOf(e.type) >= 0) {
+          $(this).removeClass("input-error");
+        }
+        this.oldValue = this.value;
+        this.oldSelectionStart = this.selectionStart;
+        this.oldSelectionEnd = this.selectionEnd;
+      } else if (this.hasOwnProperty("oldValue")) {
+        // Rejected value - restore the previous one  
+        $(this).addClass("input-error");
+        this.reportValidity();
+        this.value = this.oldValue;
+        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+      } else {
+        // Rejected value - nothing to restore
+        this.value = "";
+      }
+    });
+  };
+
+  $("#uintTextBox").inputFilter(function (value) {
+    return /^\d*$/.test(value);
+  }, "Must be an unsigned integer");
+</script>
+
+</html>
